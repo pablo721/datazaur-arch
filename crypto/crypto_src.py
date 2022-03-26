@@ -11,13 +11,16 @@ from forex_python.converter import CurrencyRates
 
 from .models import *
 from utils.decorators import prep_crypto_display, load_or_save
-from utils.formatting import prepare_df_display
-from data.constants import *
+from utils.formatting import *
+from data import constants
 
+
+CURRENCY = constants.DEFAULT_CURRENCY
+API_KEY = os.environ.get("CRYPTOCOMPARE_KEY")
 
 def gecko_quote(base, quote):
 	gecko = pycoingecko.CoinGeckoAPI()
-	coin = Cryptocurrency.objects.filter(symbol=base).first().coin_id
+	coin = CryptoCURRENCY.objects.filter(symbol=base).first().coin_id
 	data = gecko.get_coin_by_id(coin)['market_data']
 	price = data['current_price'][quote]
 	mcap = data['market_cap']
@@ -42,9 +45,9 @@ def find_quotes(base, quote, exchanges):
 def get_crypto_value(coin, quote, amount):
 	coins = top_coins_by_mcap()
 
-	if currency != quote:
+	if CURRENCY != quote:
 		rates = CurrencyRates()
-		exchange_rate = rates.get_rate(currency, quote)
+		exchange_rate = rates.get_rate(CURRENCY, quote)
 	else:
 		exchange_rate = 1
 
@@ -52,20 +55,20 @@ def get_crypto_value(coin, quote, amount):
 	return amount * price * exchange_rate
 
 
-def get_portfolio_value(portfolio, currency):
+def get_portfolio_value(portfolio, CURRENCY):
 	value = 0
 	currencies = settings.SORTED_CURRENCIES
 	for k, v in portfolio.items():
 		if k in currencies:
-			value += get_currency_value(k, currency, v)
+			value += get_CURRENCY_value(k, CURRENCY, v)
 		else:
-			value += get_crypto_value(k, currency, v)
+			value += get_crypto_value(k, CURRENCY, v)
 
 	return value
 
 
 def watchlist_prices(watchlist):
-	quote_curr = watchlist.currency.symbol
+	quote_curr = watchlist.CURRENCY.symbol
 
 	source = watchlist.default_source.name.lower()
 	exchange = getattr(ccxt, source)({'enableRateLimit': True})
@@ -93,8 +96,7 @@ def watchlist_prices(watchlist):
 
 
 def get_coins_info():
-	cryptocompare_api_key = os.environ.get('CRYPTOCOMPARE_KEY')
-	url = f'https://min-api.cryptocompare.com/data/all/coinlist?api_key={cryptocompare_api_key}'
+	url = f'https://min-api.cryptocompare.com/data/all/coinlist?api_key={API_KEY}'
 	data = pd.DataFrame(requests.get(url).json()['Data']).transpose()[['Id', 'Name', 'Symbol', 'CoinName',
 																	   'FullName', 'Description', 'Algorithm',
 																	   'ProofType', 'TotalCoinsMined',
@@ -105,19 +107,20 @@ def get_coins_info():
 
 
 def update_coin_prices():
-	url = f'https://min-api.cryptocompare.com/data/top/mktcapfull?limit=100&tsym={currency}&api_key={api_key}'
-	cols = f'CoinInfo.Symbol RAW.{currency}.PRICE'.split()
+	url = f'https://min-api.cryptocompare.com/data/top/mktcapfull?limit=100&tsym={CURRENCY}&api_key={API_KEY}'
+	cols = f'CoinInfo.Symbol RAW.{CURRENCY}.PRICE'.split()
 	df = pd.json_normalize(requests.get(url).json()['Data']).loc[:, cols]
 	df.columns = ['Symbol', 'Name', 'Price']
 	for i, r in df.iterrows():
-		coin = Cryptocurrency.objects.get(symbol=r['Symbol'])
+		coin = CryptoCURRENCY.objects.get(symbol=r['Symbol'])
 		coin.price = r['Price']
 		coin.save()
 
 
 @load_or_save('crypto_small.csv', 600)
 def coins_by_mcap():
-	url = f'https://min-api.cryptocompare.com/data/top/mktcapfull?limit=50&tsym={CURRENCY}&api_key={CRYPTOCOMPARE_KEY}'
+
+	url = f'https://min-api.cryptocompare.com/data/top/mktcapfull?limit=50&tsym={CURRENCY}&api_key={API_KEY}'
 	cols = f'CoinInfo.Name RAW.{CURRENCY}.PRICE RAW.{CURRENCY}.CHANGE24HOUR RAW.{CURRENCY}.CHANGEPCT24HOUR'.split()
 	df = pd.json_normalize(requests.get(url).json()['Data'])[cols]
 	df.columns = ['Symbol', 'Price', '24h Δ', '24h %Δ']
@@ -126,13 +129,13 @@ def coins_by_mcap():
 
 @load_or_save('crypto.csv', 1200)
 def top_coins_by_mcap():
-	url = f'https://min-api.cryptocompare.com/data/top/mktcapfull?limit=100&tsym={currency}&api_key={api_key}'
-	cols = f'CoinInfo.Name CoinInfo.FullName CoinInfo.Url RAW.{currency}.PRICE ' \
-		   f'RAW.{currency}.CHANGEPCTHOUR RAW.{currency}.CHANGEPCT24HOUR ' \
-		   f'RAW.{currency}.TOTALVOLUME24HTO ' \
-		   f'RAW.{currency}.MKTCAP RAW.{currency}.SUPPLY RAW.{currency}.LASTUPDATE'.split()
+	url = f'https://min-api.cryptocompare.com/data/top/mktcapfull?limit=100&tsym={CURRENCY}&api_key={API_KEY}'
+	cols = f'CoinInfo.Name CoinInfo.FullName CoinInfo.Url RAW.{CURRENCY}.PRICE ' \
+		   f'RAW.{CURRENCY}.CHANGEPCTHOUR RAW.{CURRENCY}.CHANGEPCT24HOUR ' \
+		   f'RAW.{CURRENCY}.TOTALVOLUME24HTO ' \
+		   f'RAW.{CURRENCY}.MKTCAP RAW.{CURRENCY}.SUPPLY RAW.{CURRENCY}.LASTUPDATE'.split()
 	df = pd.json_normalize(requests.get(url).json()['Data']).loc[:, cols]
-	df.columns = ['Symbol', 'Name', 'Url', 'Price', '1h Δ', '24h Δ', '24h vol', f'Market cap ({currency})',
+	df.columns = ['Symbol', 'Name', 'Url', 'Price', '1h Δ', '24h Δ', '24h vol', f'Market cap ({CURRENCY})',
 				  'Supply', 'Updated']
 	df.dropna(inplace=True)
 	df.iloc[:, 3:6] = df.iloc[:, 3:6].astype('float64').round(3)
@@ -143,15 +146,15 @@ def top_coins_by_mcap():
 
 @load_or_save('exchanges.csv', 86400)
 def exchanges_by_vol():
-	url = f'https://min-api.cryptocompare.com/data/exchanges/general?api_key={api_key}&tsym={currency}'
+	url = f'https://min-api.cryptocompare.com/data/exchanges/general?api_key={API_KEY}&tsym={CURRENCY}'
 	df = pd.DataFrame(requests.get(url).json()['Data']).transpose()[
 		['Name', 'Country', 'Grade', 'TOTALVOLUME24H', 'AffiliateURL']]
 	df['Name'] = df.apply(lambda x: f"""<a href={x['AffiliateURL']}>{x['Name']}</a>""", axis=1)
 	df['24h vol (BTC)'] = df['TOTALVOLUME24H'].apply(lambda x: x['BTC'], True).round(3)
-	df[f'24h vol ({currency})'] = df['TOTALVOLUME24H'].apply(lambda x: '%.3f' % x[currency], True)
+	df[f'24h vol ({CURRENCY})'] = df['TOTALVOLUME24H'].apply(lambda x: '%.3f' % x[CURRENCY], True)
 	df = df.drop(['TOTALVOLUME24H', 'AffiliateURL'], axis=1).sort_values(by='24h vol (BTC)',
 																		 ascending=False).reset_index(drop=True)
-	vol_col = f'Volume ({currency})'
+	vol_col = f'Volume ({CURRENCY})'
 	df.columns = ['Name', 'Country', 'Grade', vol_col, 'Url']
 	df.drop('Url', axis=1, inplace=True)
 	df[vol_col] = list(map(lambda x: format(x, ','), df[vol_col]))
@@ -165,9 +168,7 @@ def global_metrics():
 
 def market_dominance(top_n_coins):
 	filename = '~/PycharmProjects/datazaur_web/crypto.csv'
-	currency = 'USD'
-
-	coins = pd.read_csv(filename, index_col=0).loc[:top_n_coins, f'Market cap ({currency})']
+	coins = pd.read_csv(filename, index_col=0).loc[:top_n_coins, f'Market cap ({CURRENCY})']
 
 
 def prep_market_df(df, n_decimals=3):

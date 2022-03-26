@@ -43,9 +43,12 @@ def setup_all():
 		load_config()
 		print('Config loaded.')
 		load_countries()
-		setup_fx_db()
-		setup_crypto_db()
+		load_currencies()
+		map_currencies_to_countries()
 
+		load_cryptocomp_coins()
+		load_gecko_coins()
+		load_crypto_exchanges()
 
 		print(f'All imports complete.')
 	except Exception as e:
@@ -61,14 +64,19 @@ def load_cryptocomp_coins():
 					 'circ_supply', 'max_supply', 'block_reward', 'url', 'used_in_defi', 'used_in_nft']
 	for i, row in coins.iterrows():
 		Cryptocurrency.objects.create(**dict(row))
-	print(f'Loaded {Cryptocurrency.objects.all().count() - n} cryptocurrencies to database.')
+	print(f'Loaded {Cryptocurrency.objects.all().count() - n} cryptocurrencies from Cryptocompare.')
 
 
 def load_gecko_coins():
+	n = Cryptocurrency.objects.all().count()
 	gecko = CoinGeckoAPI()
 	coins = pd.DataFrame(columns=['id', 'symbol', 'name'], data=gecko.get_coins_list()).set_index('symbol',
 																								  inplace=True,
 																								  drop=True)
+	for i, r in coins.iterrows():
+		if not Cryptocurrency.objects.filter(symbol__ilike=i).exists():
+			Cryptocurrency.objects.create(symbol=i.lower(), name=r['name'].lower())
+	print(f'Loaded {Cryptocurrency.objects.all().count() - n} cryptocurrencies from CoinGecko.')
 
 
 def load_countries():
@@ -115,6 +123,56 @@ def map_currencies_to_countries():
 	print(f'Mapped {n} currencies to countries.')
 
 
+def load_crypto_exchanges():
+	n = CryptoExchange.objects.all().count()
+	default_exchanges = str(DEFAULT_CRYPTO_EXCHANGES)
+	for exchange_id in ccxt.exchanges:
+		if re.search(exchange_id, default_exchanges):
+			exchange_obj = getattr(ccxt, exchange_id)({'enableRateLimit': True})
+			exchange_obj.load_markets()
+			ex = CryptoExchange.objects.create(name=exchange_id, url=exchange_obj.urls['www'])
+			for country_code in exchange_obj.countries:
+				if Country.objects.get(alpha_2=country_code).exists():
+					ex.countries.add(Country.objects.get(alpha_2=country_code))
+			ex.save()
+		else:
+			CryptoExchange.objects.create(name=exchange_id)
+	print(f'Loaded {CryptoExchange.objects.all().count() - n} exchanges to database.')
+
+
+
+def setup_crypto_db(exchange_id='binance', quote='USDT'):
+	n = Cryptocurrency.objects.all().count()
+	gecko = pycoingecko.CoinGeckoAPI()
+	coins = pd.DataFrame(columns=['id', 'symbol', 'name'], data=gecko.get_coins_list()).set_index('symbol',
+																								  inplace=True,
+																								  drop=True)
+	exchange = getattr(ccxt, exchange_id)({'enableRateLimit': True})
+	markets = pd.DataFrame(exchange.fetch_tickers()).transpose()
+	markets = markets.loc[list(filter(lambda x: x.split('/')[1] == quote, markets.index))]['last']
+	for i, v in markets.items():
+		coin = i.split('/')[0].lower()
+		try:
+			name = coins.loc[coin, 'name']
+
+		except:
+			name = ''
+		Cryptocurrency.objects.create(symbol=coin, name=name, price=v)
+	print(f'Loaded {Cryptocurrency.objects.all().count() - n} cryptocurrencies to database.')
+
+
+
+
+
+def connect_exchange(exchange_id, quote='USDT'):
+	exchange = getattr(ccxt, exchange_id)({'enableRateLimit': True})
+	return pd.DataFrame(exchange.fetch_tickers()).transpose()
+
+
+def filter_by_quote(ticker, quote='USDT'):
+	return ticker.split('/')[1].__eq__(quote)
+
+
 # def setup_fx_db():
 #     code = None
 #     currencies = country_currencies.CURRENCIES_BY_COUNTRY_CODE
@@ -140,49 +198,3 @@ def map_currencies_to_countries():
 
 
 # coins = get_coins_info()[['Symbol', 'CoinName']]
-
-
-def setup_crypto_db(exchange_id='binance', quote='USDT'):
-	n = Cryptocurrency.objects.all().count()
-	gecko = pycoingecko.CoinGeckoAPI()
-	coins = pd.DataFrame(columns=['id', 'symbol', 'name'], data=gecko.get_coins_list()).set_index('symbol',
-																								  inplace=True,
-																								  drop=True)
-	exchange = getattr(ccxt, exchange_id)({'enableRateLimit': True})
-	markets = pd.DataFrame(exchange.fetch_tickers()).transpose()
-	markets = markets.loc[list(filter(lambda x: x.split('/')[1] == quote, markets.index))]['last']
-	for i, v in markets.items():
-		coin = i.split('/')[0].lower()
-		try:
-			name = coins.loc[coin, 'name']
-
-		except:
-			name = ''
-		Cryptocurrency.objects.create(symbol=coin, name=name, price=v)
-	print(f'Loaded {Cryptocurrency.objects.all().count() - n} cryptocurrencies to database.')
-
-
-def load_crypto_exchanges():
-	n = CryptoExchange.objects.all().count()
-	default_exchanges = str(DEFAULT_CRYPTO_EXCHANGES)
-	for exchange_id in ccxt.exchanges:
-		if re.search(exchange_id, default_exchanges):
-			exchange_obj = getattr(ccxt, exchange_id)({'enableRateLimit': True})
-			exchange_obj.load_markets()
-			ex = CryptoExchange.objects.create(name=exchange_id, url=exchange_obj.urls['www'])
-			for country_code in exchange_obj.countries:
-				if Country.objects.get(alpha_2=country_code).exists():
-					ex.countries.add(Country.objects.get(alpha_2=country_code))
-			ex.save()
-		else:
-			CryptoExchange.objects.create(name=exchange_id)
-	print(f'Loaded {CryptoExchange.objects.all().count() - n} exchanges to database.')
-
-
-def connect_exchange(exchange_id, quote='USDT'):
-	exchange = getattr(ccxt, exchange_id)({'enableRateLimit': True})
-	return pd.DataFrame(exchange.fetch_tickers()).transpose()
-
-
-def filter_by_quote(ticker, quote='USDT'):
-	return ticker.split('/')[1].__eq__(quote)

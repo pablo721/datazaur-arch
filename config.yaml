@@ -1,7 +1,7 @@
 
 refresh_rate : 600
 
-fx_filepath : /data/iso-4217-currency-codes.csv
+
 fx_file : forex.csv
 crypto_file : crypto.csv
 exchanges_file : exchanges.csv
@@ -9,12 +9,11 @@ csv_dir : csv_files
 
 
 fav_crypto_exchange : binance
-
 cryptocompare_url : https://cryptocompare.com
 
 
-db_name : d9hoo4qbgp6uq9
-db_user : mhyckrjvahjtjf
-db_password : 901fc27da08a9f252ebd75fea3712b769ca65196438e4a67979edb3df750870c
-db_host : ec2-34-255-134-200.eu-west-1.compute.amazonaws.com
-db_port : 5432
+heroku_name : d9hoo4qbgp6uq9
+heroku_user : mhyckrjvahjtjf
+heroku_password : 901fc27da08a9f252ebd75fea3712b769ca65196438e4a67979edb3df750870c
+heroku_host : ec2-34-255-134-200.eu-west-1.compute.amazonaws.com
+heroku_port : 5432

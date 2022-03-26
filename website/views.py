@@ -16,32 +16,11 @@ from data.constants import *
 class HomeView(TemplateView):
     template_name = 'website/home.html'
 
-
-def home(request):
-    context = {}
-    if request.user.is_authenticated:
-        print('authed')
-        context['user'] = request.user
-        context['currency_form'] = SelectCurrency()
-        profile = Profile.objects.get(user=request.user)
+    def get_context_data(self, **kwargs):
+        if self.request.user.is_authenticated:
+            return {'user': request.user}
 
 
-    if request.method == 'POST' and 'currency' in str(request.POST):
-        print(request.POST)
-
-        currency_form = SelectCurrency(request.POST)
-        if currency_form.is_valid():
-            data = currency_form.cleaned_data
-            user = request.user
-            user.currency = Currency.objects.get(symbol=data['currency'])
-            user.save()
-            print(user.currency.name)
-
-
-        else:
-            print(f'errors: {currency_form.errors}')
-
-    return render(request, 'website/home.html', context)
 
 
 class LoginView(View):

@@ -1,6 +1,8 @@
 from data.constants import *
 import pandas as pd
 import random
+import os
+
 
 
 def get_random_color():
@@ -16,8 +18,9 @@ def round_number(x, n):
 
 
 def add_hyperlinks(df):
+    url = 'https://cryptocompare.com'
     for col in ['Symbol', 'Name']:
-        df[col] = df.apply(lambda x: f"""<a href={URL + x['Url']}>{x[col]}</a>""", axis=1)
+        df[col] = df.apply(lambda x: f"""<a href={url + x['Url']}>{x[col]}</a>""", axis=1)
     return df
 
 

@@ -3,7 +3,7 @@ from django.views.generic import TemplateView
 from .forms import AddFXTicker
 from .markets_src import *
 from website.models import *
-from data.constants import *
+from data import constants
 
 
 class MarketsView(TemplateView):
@@ -15,7 +15,7 @@ class MarketsView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = all_markets_data()
-        context['currencies'] = SORTED_CURRENCIES
+        context['currencies'] = constants.SORTED_CURRENCIES
         return context
 
 
@@ -29,7 +29,7 @@ class ForexView(TemplateView):
         elif request.user.is_authenticated and Account.objects.get(user=request.user).currency.exists():
             currency = Account.objects.get(user=request.user).first().currency.symbol
         else:
-            currency = DEFAULT_CURRENCY
+            currency = constants.DEFAULT_CURRENCY
         rates_df = pd.DataFrame(get_fx_rates(currency))
         col_name = rates_df.columns[0]
         rates_df = rates_df[rates_df[col_name] != 1]
@@ -44,8 +44,8 @@ class ForexView(TemplateView):
 
 
 def forex_matrix(request):
-    table = get_fx_rates(DEFAULT_CURRENCY)
-    context = {'currencies': SORTED_CURRENCIES, 'table': table.to_html()}
+    table = get_fx_rates(constants.DEFAULT_CURRENCY)
+    context = {'currencies': constants.SORTED_CURRENCIES, 'table': table.to_html()}
     return render(request, 'markets/forex_matrix.html', context)
 
 

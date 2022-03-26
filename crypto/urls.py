@@ -4,7 +4,7 @@ from . import views
 
 app_name = 'crypto'
 urlpatterns = [
-    path('', views.crypto, name='crypto'),
+    path('', views.CryptoView.as_view(), name='crypto'),
     path('exchanges/', views.ExchangesView.as_view(), name='exchanges'),
     path('addExchange/', views.add_exchange, name='add_exchange'),
     path('dominance/', views.DominanceView.as_view(), name='dominance'),

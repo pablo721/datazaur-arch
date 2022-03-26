@@ -6,9 +6,10 @@ from utils.decorators import load_or_save
 from utils.formatting import *
 from data import constants
 from website.models import Config
+from crypto.crypto_src import *
 
 
-
+CURRENCY = constants.DEFAULT_CURRENCY
 
 def get_currency_value(base, quote, amount):
 	rates = CurrencyRates()
@@ -18,7 +19,7 @@ def get_currency_value(base, quote, amount):
 
 def all_markets_data():
 	TENOR = '10Y'
-	if Config.objects.get(key='refresh_rate').exists():
+	if Config.objects.filter(key='refresh_rate').exists():
 		refresh_rate = Config.objects.get(key='refresh_rate')
 	else:
 		refresh_rate = 600
@@ -36,7 +37,7 @@ def all_markets_data():
 	data['yields'] = prep_market_df(yields).to_html(escape=False, justify='center')
 
 	commodities_file = 'commodities.csv'
-	if file in os.listdir() and datetime.datetime.now().timestamp() - os.path.getmtime(file) < refresh_rate:
+	if commodities_file in os.listdir() and datetime.datetime.now().timestamp() - os.path.getmtime(commodities_file) < refresh_rate:
 		data['commodities'] = pd.read_csv(commodities_file, index_col=0)
 	else:
 		commodities = get_commodities()

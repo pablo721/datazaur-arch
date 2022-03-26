@@ -11,16 +11,34 @@ from utils.formatting import *
 from website.models import Account, Config
 from .models import *
 from .forms import *
-from markets.models import Watchlist, Portfolio, PortfolioAmounts
+from markets.models import *
+
 
 class CryptoView(TemplateView):
     template_name = 'crypto/crypto.html'
 
 
+    def get_context_data(self, **kwargs):
+        currencies = Currency.objects.all()
+        coins = Cryptocurrency.objects.all()
+        table = top_coins_by_mcap()
+        table['Watchlist'] = table['Symbol'].apply(lambda
+                                                       x: f"""<input type="checkbox" name="watch_{x}" id="watch_{x.split('</a>')[0].split('>')[1]}" class="star">""")
+        table['Portfolio'] = table['Symbol'].apply(lambda
+                                                       x: f""" <button type="submit" name="add_to_pf" value="{x.split('</a>')[0].split('>')[1]}"> Add </button>""")
+        watchlists = []
+        if self.request.user.is_authenticated:
+            acc = Account.objects.get(user=self.request.user)
+            watchlists = acc.watchlists.all()
+
+        return {'currencies': currencies, 'coins': coins, 'table': table.to_html(escape=False, justify='center'),
+                'watchlists': watchlists}
+
+
 def crypto(request):
     context = {}
     context['currencies'] = Currency.objects.all()
-    refresh_rate = REFRESH_RATE
+
     coin_ids = []
 
     table = top_coins_by_mcap()
@@ -31,17 +49,17 @@ def crypto(request):
     context['table'] = table.to_html(escape=False, justify='center')
 
     if request.user.is_authenticated:
-        profile = Profile.objects.get(user=request.user)
-        watchlist = Watchlist.objects.filter(user=profile).first()
+        account = Account.objects.get(user=request.user)
+        watchlist = Watchlist.objects.filter(user=account).first()
         coins = watchlist.coins.all()
 
         print(coins)
         context['watchlist_ids'] = [c.symbol.lower() for c in coins]
         print(context['watchlist_ids'])
-        if profile.currency:
-            context['currency'] = profile.currency.symbol
+        if account.currency:
+            context['currency'] = account.currency.symbol
         else:
-            context['currency'] = DEFAULT_CURRENCY
+            context['currency'] = constants.DEFAULT_CURRENCY
 
     if request.method == 'GET':
         return render(request, 'crypto/crypto.html', context)
@@ -66,7 +84,7 @@ def crypto(request):
             print(request.POST)
             coin_id = request.POST['coin']
             new_amount = request.POST['amount']
-            portfolio = Portfolio.objects.get(user=profile)
+            portfolio = Portfolio.objects.get(user=account)
             if Amounts.objects.filter(portfolio=portfolio).filter(coin=coin_id).exists():
                 amount = Amounts.objects.filter(portfolio=portfolio).filter(coin=coin_id)
                 amount.amount += new_amount
