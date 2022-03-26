@@ -1,0 +1,9 @@
+
+<form id="change_currency_form" method="post" action="#" onclick="">
+    {% csrf_token %}
+    <h4> Change currency </h4>
+    {{ change_currency.as_p }}
+    <button id="change_currency" name="change_currency" type="submit" value="save"> Save </button>
+</form>
+
+

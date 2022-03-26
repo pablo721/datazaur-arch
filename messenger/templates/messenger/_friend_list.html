@@ -1,0 +1,42 @@
+<h3>
+    Friends
+</h3>
+<table id="friend_list">
+    <thead>
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Online
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if friends %}
+            {% for friend in friends %}
+                <tr>
+                    <td>
+                        <h5>
+                            <a href="/messenger/{{ friend.id }}">{{ friend }}</a>
+                        </h5>
+                    </td>
+                    <td>
+                        <img src="{% static 'img/green-dot.png' %}" alt="x" width="18px" height="18px">
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+
+    </tbody>
+</table>
+
+
+
+{% comment %}
+<!--                       {% if friend.online is True %}-->
+<!--                            <img src="{% static 'img/green-dot.png' %}">-->
+<!--                        {% else %}-->
+<!--                            <img src="{% static 'img/red-dot.png' %}">-->
+<!--                        {% endif %}-->
+{% endcomment %}

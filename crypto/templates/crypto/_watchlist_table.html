@@ -1,0 +1,87 @@
+
+<table id="watchlist_table">
+    <thead>
+        <tr>
+            <th>
+                Symbol
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                Amount
+            </th>
+            <th>
+                Price
+            </th>
+            <th>
+                1h Δ
+            </th>
+            <th>
+                24h Δ
+            </th>
+            <th>
+                7d Δ
+            </th>
+            <th>
+                Market cap
+            </th>
+            <th>
+                Source
+            </th>
+            <th>
+                <form method="POST" id="del_from_watchlist_form" action="#">
+                    {% csrf_token %}
+                    <input type="hidden" name="checked_symbols" id="checked_symbols">
+                    <button type="submit" name="delete_from_watchlist" id="delete_from_watchlist" onclick="findChecked()">
+                        Delete
+                    </button>
+                </form>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for coin in object_list %}
+        <tr>
+            <td>
+                {{ coin.symbol.upper }}
+            </td>
+            <td>
+                {{ coin.name }}
+            </td>
+            <td>
+                0
+            </td>
+            <td>
+                {{ coin.price }}
+            </td>
+            <td>
+                1h Δ
+            </td>
+            <td>
+                24h Δ
+            </td>
+            <td>
+                7d Δ
+            </td>
+            <td>
+                m cap
+            </td>
+            <td>
+                <form id="source_{{ coin.id }}" method="post" action="#">
+                    {% csrf_token %}
+                    {{ set_source.as_p }}
+                    <input type="hidden" name="coin" value="{{ coin.id }}">
+                    <button type="submit" id="source_btn" name="source_btn" value="submit">
+                        Save
+                    </button>
+                </form>
+
+            </td>
+            <td>
+                <input type="checkbox" class="star" id="del_{{ coin.id }}">
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

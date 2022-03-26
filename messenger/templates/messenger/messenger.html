@@ -1,0 +1,17 @@
+{% extends 'website/base.html' %}
+
+{% block content %}
+<div id="messenger">
+    <div id="search_friends">
+        {% include 'messenger/_add_friend.html' %}
+    </div>
+    <div id="friends_list">
+        {% include 'messenger/_friend_list.html' %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+

@@ -1,0 +1,37 @@
+{% extends 'crypto/crypto.html' %}
+
+{% block content %}
+    <div id="trends_options">
+        <label>
+            Timeframe
+        </label>
+        <select id="trends_timeframes" onchange="changeTimeframe();">
+            {% for timeframe in timeframes %}
+                <option> {{ timeframe }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div id="trends_div">
+        <div id="gainers_table">
+            <h2 id="gainers_title">
+                <b> Biggest gainers </b>
+            </h2>
+            {{ gainers_table |safe }}
+        </div>
+
+        <div id="losers_table">
+            <h2 id="losers_title">
+                <b> Biggest losers </b>
+            </h2>
+            {{ losers_table |safe }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/changeTimeframe.js' %}" type="text/javascript"></script>
+
+{% endblock %}
+
+

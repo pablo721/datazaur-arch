@@ -1,0 +1,10 @@
+
+<form id="add_coin_form" method="post" action="#">
+    {% csrf_token %}
+    <h4>
+        Add coin
+    </h4>
+    {{ add_form.as_p }}
+    <button id="add_coin_button" name="add_coin" type="submit" value="save"> Add </button>
+</form>
+

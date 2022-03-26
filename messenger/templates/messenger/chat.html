@@ -1,0 +1,23 @@
+{% extends 'messenger/messenger.html' %}
+
+{% block content %}
+    <div id="friends_list">
+        {% include 'messenger/_friend_list.html' %}
+    </div>
+
+    <div id="chat_window">
+        {% include 'messenger/_chat_window.html' %}
+        {% include 'messenger/_message_form.html' %}
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript">
+        var friend_id = {{ recipient.id }};
+        console.log(friend_id);
+    </script>
+    <script src="{% static 'js/messenger.js' %}"></script>
+
+{% endblock %}
+
+

@@ -1,0 +1,38 @@
+
+<form id="find_friends_form" method="get" action="#">
+    <h3 id="friends_search_label">
+        Find users
+    </h3>
+    {{ find_users.as_p }}
+
+    <button id="find_friends_button" type="submit" name="find_users">
+        Search
+    </button>
+</form>
+
+<h3 id="search_results_label">
+    Search results
+</h3>
+<ul id="friends_search_results" class="w3-ul">
+    {% for user in search_results %}
+        <li id="{{ user.id }}">
+            <div class="search_result_name">
+                <a href="/profile/{{ user.username }}">
+                    {{ user.username }}
+                </a>
+            </div>
+            <div class="search_result_buttons">
+                <button id="follow{{ user.id }}" type="submit" name="follow" value="{{ user.id }}" class="follow_button">
+                    Follow
+                </button>
+                <form id="add_friend_form{{ user.id }}" method="post" action="#">
+                    {% csrf_token %}
+                    <button id="add_friend{{ user.id }}" type="submit" name="add_friend" value="{{ user.id }}" class="add_button">
+                        Add
+                    </button>
+                </form>
+            </div>
+        </li>
+    {% endfor %}
+</ul>
+

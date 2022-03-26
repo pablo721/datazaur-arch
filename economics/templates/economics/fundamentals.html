@@ -1,0 +1,50 @@
+{% extends 'website/base.html' %}
+
+{% block content %}
+    <div id="fund_search">
+        <form id="ticker_search" method="get" action="#">
+            {{ search_form.as_table }}
+            <button type="submit" id="fund_searchbutton">
+                Search
+            </button>
+        </form>
+    </div>
+
+    <div id="fund_summary">
+        <h2> {{ ticker }} </h2>
+        <p> {{ summary }} </p>
+    </div>
+
+    <div id="fund_baseinfo">
+        <select id="info_change">
+            <option id="base" name="info_type" value="base"> Base info </option>
+            <option id="esg" name="info_type" value="esg"> ESG info </option>
+        </select>
+        {{ info |safe }}
+    </div>
+
+    <div id="fund_finstatements">
+        {{ financials |safe }}
+        {{ cashflow |safe }}
+        {{ earnings |safe }}
+        {{ balance_sheet |safe }}
+    </div>
+    <div id="fund_holders">
+        {{ major_holders |safe }}
+        {{ mutualfund_holders |safe }}
+        {{ institutional_holders |safe }}
+    </div>
+    <div id="fund_esginfo">
+        {% include 'fundamentals/_esg_info.html' %}
+    </div>
+    <div id="fund_pricehistory">
+        {% include 'fundamentals/_price_history.html' %}
+    </div>
+
+{% endblock %}
+
+
+
+{% block js %}
+    <script src="{% static 'js/chgInfoType.js' %}" type="text/javascript"></script>
+{% endblock %}

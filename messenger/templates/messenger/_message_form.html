@@ -1,0 +1,11 @@
+
+<form id="msg_form" method="post" action="">
+    {% csrf_token %}
+    <input id="sender_id" type="hidden" name="sender_id" value="{{ profile.id }}">
+    <input id="recipient_id" type="hidden" name="recipient_id" value="{{ recipient.id }}">
+    <button id="clear_msg" type="reset"> Clear </button>
+    <input id="msg_text" type="text" name="msg_text">
+    <button id="msg_button" type="submit" form="msg_form"> Send </button>
+</form>
+
+
