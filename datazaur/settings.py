@@ -15,7 +15,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET')
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'datazaur.herokuapp.com'
+    'datazaur.herokuapp.com',
+     '127.0.0.1'
 ]
 
 
@@ -75,7 +76,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'freshdb',
         'USER': 'zaur',
-        'PASSWORD': 'wsad1221',
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
         'HOST': 'localhost',
         'PORT': '5432',
         }
@@ -115,9 +116,13 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = 'static/'
-
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static', 'css'),
+    os.path.join(BASE_DIR, 'static', 'js'),
+    os.path.join(BASE_DIR, 'static', 'img'),
+    ]
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
