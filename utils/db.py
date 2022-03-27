@@ -62,8 +62,10 @@ def load_cryptocomp_coins():
 									 'IsUsedInDefi', 'IsUsedInNft']]
 	coins.columns = ['symbol', 'name', 'description', 'hash_algorithm', 'proof_type', 'total_coins_mined',
 					 'circ_supply', 'max_supply', 'block_reward', 'url', 'used_in_defi', 'used_in_nft']
+	coins['description'] = coins['description'].apply(lambda x: x[:255])
 	for i, row in coins.iterrows():
-		Cryptocurrency.objects.create(**dict(row))
+		if not Cryptocurrency.objects.filter(symbol=row['symbol']).exists():
+			Cryptocurrency.objects.create(**dict(row))
 	print(f'Loaded {Cryptocurrency.objects.all().count() - n} cryptocurrencies from Cryptocompare.')
 
 
@@ -84,7 +86,7 @@ def load_countries():
 	n_upd = 0
 	n = Country.objects.all().count()
 	for obj in countries:
-		if Country.objects.get(name=obj.name).exists():
+		if Country.objects.filter(name=obj.name).exists():
 			Country.objects.get(name=obj.name).update(**dict(obj))
 			n_upd += 1
 		else:
@@ -100,7 +102,7 @@ def load_currencies():
 	n = FiatCurrency.objects.all().count()
 	n_upd = 0
 	for c in currencies.objects:
-		if FiatCurrency.objects.get(alpha_3=c.alpha_3).exists():
+		if FiatCurrency.objects.filter(alpha_3=c.alpha_3).exists():
 			FiatCurrency.objects.get(alpha_3=c.alpha_3).update(**dict(c))
 			n_upd += 1
 		else:
@@ -114,7 +116,7 @@ def map_currencies_to_countries():
 	codes = country_currencies.CURRENCIES_BY_COUNTRY_CODE
 	for country in Country.objects.all():
 		alpha_3 = codes[country.alpha_2][0]
-		if FiatCurrency.objects.get(alpha_3=alpha_3).exists():
+		if FiatCurrency.objects.filter(alpha_3=alpha_3).exists():
 			currency = FiatCurrency.objects.get(alpha_3=alpha_3)
 			if currency not in country.currencies.all():
 				country.currencies.add(currency)
@@ -132,7 +134,7 @@ def load_crypto_exchanges():
 			exchange_obj.load_markets()
 			ex = CryptoExchange.objects.create(name=exchange_id, url=exchange_obj.urls['www'])
 			for country_code in exchange_obj.countries:
-				if Country.objects.get(alpha_2=country_code).exists():
+				if Country.objects.filter(alpha_2=country_code).exists():
 					ex.countries.add(Country.objects.get(alpha_2=country_code))
 			ex.save()
 		else:

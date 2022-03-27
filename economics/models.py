@@ -8,8 +8,10 @@ class Country(models.Model):
     name = models.CharField(max_length=64, blank=False)
     numeric = models.IntegerField()
     currencies = models.ManyToManyField('markets.Currency', related_name='country_currencies')
+    official_name = models.CharField(max_length=128)
     gdp = models.FloatField()
     gdp_ppp = models.FloatField()
     population = models.IntegerField(validators=[MaxValueValidator(30_000_000_000)])
+
 
 

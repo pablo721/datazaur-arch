@@ -9,8 +9,9 @@ from django.urls import reverse
 from .models import *
 from .forms import *
 from .utils import *
-from markets.models import Currency, Watchlist, Portfolio
-from data.constants import *
+from crypto.models import Watchlist, Portfolio
+from markets.models import Currency
+from data import constants
 
 
 class HomeView(TemplateView):
@@ -19,8 +20,6 @@ class HomeView(TemplateView):
     def get_context_data(self, **kwargs):
         if self.request.user.is_authenticated:
             return {'user': request.user}
-
-
 
 
 class LoginView(View):
@@ -103,11 +102,10 @@ def signup(request):
         user_form = UserCreationForm(request.POST)
         if user_form.is_valid():
             form_data = user_form.cleaned_data
-            user = MyUser.objects.create_user(username=form_data['username'], password=form_data['password1'])
+            user = User.objects.create_user(username=form_data['username'], password=form_data['password1'])
             request.session.set_expiry(86400)
             login(request, user)
-            Watchlist.objects.create(user=profile)
-            Portfolio.objects.create(user=profile)
+            setup_account(request)
             return render(request, 'website/home.html', context)
 
         else:

@@ -16,7 +16,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'datazaur.herokuapp.com',
-     '127.0.0.1'
+     '127.0.0.1',
+    'localhost'
 ]
 
 
@@ -29,6 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
     'crypto',
     'markets',
     'economics',
@@ -75,15 +77,15 @@ WSGI_APPLICATION = 'datazaur.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'freshdb',
+        'NAME': 'freshdb2',
         'USER': 'zaur',
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'PASSWORD': 'wsad1221',
         'HOST': 'localhost',
         'PORT': '5432',
         }
     }
 
-
+DJANGO_EXTENSIONS_RESET_DB_POSTGRESQL_ENGINES = ['django.db.backends.postgresql_psycopg2']
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 

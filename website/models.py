@@ -4,12 +4,12 @@ from django.contrib.auth.models import User
 
 class Account(models.Model):
     user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name='user_account')
-    currency = models.ForeignKey('markets.Currency', on_delete=models.CASCADE)
+    currency_code = models.CharField(max_length=3)
     signup_location = models.CharField(max_length=64)
     signup_ip = models.CharField(max_length=45)
     friends = models.ManyToManyField('self')
     exchanges = models.ManyToManyField('crypto.CryptoExchange')
-    watchlists = models.ManyToManyField('markets.Watchlist')
+    watchlists = models.ManyToManyField('crypto.Watchlist')
 
     def __str__(self):
         return self.user.username

@@ -26,7 +26,7 @@ class ForexView(TemplateView):
         print(str(self.request.GET))
         if 'currency' in str(self.request.GET):
             currency = request.GET['currency']
-        elif request.user.is_authenticated and Account.objects.get(user=request.user).currency.exists():
+        elif self.request.user.is_authenticated and Account.objects.get(user=request.user).currency.exists():
             currency = Account.objects.get(user=request.user).first().currency.symbol
         else:
             currency = constants.DEFAULT_CURRENCY
