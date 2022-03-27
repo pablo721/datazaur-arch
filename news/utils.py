@@ -8,11 +8,7 @@ from utils.decorators import load_or_save
 from website.models import Config
 
 
-filename = 'cryptocomp_news.csv'
-
-
 def econ_calendar():
-
     file = 'calendar.csv'
     refresh_rate = 86400
 
@@ -25,11 +21,11 @@ def econ_calendar():
     return calendar
 
 
+filename = 'cryptocomp_news.csv'
 
-
-@load_or_save('cryptocomp_news.csv', 86400)
+@load_or_save(filename, 86400)
 def cryptocomp_news():
-    api_key = os.environ.get('CRYPTOCOMPARE_API_KEY')
+    api_key = '70d54fd6e56db84eba0a9d9166b4d5da087c79d3d6cc0511e69144270f90c09b'
     url = f'https://min-api.cryptocompare.com/data/v2/news/?lang=EN&api_key={api_key}'
     df = pd.json_normalize(requests.get(url).json()['Data'])[['published_on', 'title', 'url', 'source', 'body',
                                                           'categories']]
@@ -50,11 +46,7 @@ def gecko_events():
     events = gecko.get_events()['data']
     for event in events:
         data.append([event['description'], pd.DataFrame(pd.Series(event)).drop('description').transpose().to_html(escape=False, justify='center')])
-
-
     return data
-
-
 
 
 def scrap_news():

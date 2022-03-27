@@ -11,7 +11,7 @@ from markets.models import *
 from website.models import *
 from crypto.models import *
 from economics.models import *
-from data.constants import *
+from data import constants
 from crypto.crypto_src import get_coins_info
 
 
@@ -44,12 +44,10 @@ def setup_all():
 		print('Config loaded.')
 		load_countries()
 		load_currencies()
-		map_currencies_to_countries()
-
+		map_currencies()
 		load_cryptocomp_coins()
-		load_gecko_coins()
+		#load_gecko_coins()
 		load_crypto_exchanges()
-
 		print(f'All imports complete.')
 	except Exception as e:
 		print(f'Error: {e}')
@@ -57,12 +55,9 @@ def setup_all():
 
 def load_cryptocomp_coins():
 	n = Cryptocurrency.objects.all().count()
-	coins = get_coins_info().loc[:, ['Symbol', 'CoinName', 'Description', 'Algorithm', 'ProofType', 'TotalCoinsMined',
-									 'CirculatingSupply', 'MaxSupply', 'BlockReward', 'AssetWebsiteUrl',
-									 'IsUsedInDefi', 'IsUsedInNft']]
-	coins.columns = ['symbol', 'name', 'description', 'hash_algorithm', 'proof_type', 'total_coins_mined',
-					 'circ_supply', 'max_supply', 'block_reward', 'url', 'used_in_defi', 'used_in_nft']
-	coins['description'] = coins['description'].apply(lambda x: x[:255])
+	coins = get_coins_info().loc[:, ['Symbol', 'CoinName', 'Description', 'Algorithm', 'ProofType', 'AssetWebsiteUrl']]
+	coins.columns = ['symbol', 'name', 'description', 'hash_algorithm', 'proof_type', 'url']
+	coins[['description', 'url']] = coins[['description', 'url']].apply(lambda x: x[:255])
 	for i, row in coins.iterrows():
 		if not Cryptocurrency.objects.filter(symbol=row['symbol']).exists():
 			Cryptocurrency.objects.create(**dict(row))
@@ -90,44 +85,45 @@ def load_countries():
 			Country.objects.get(name=obj.name).update(**dict(obj))
 			n_upd += 1
 		else:
-			Country.objects.create(alpha_2=obj.alpha_2, alpha_3=obj.alpha_3, name=obj.name, numeric=obj.numeric,
-								   official_name=obj.official_name)
-
+			Country.objects.create(alpha_2=obj.alpha_2, name=obj.name)
 	print(f'Added {Country.objects.all().count() - n} countries to database. \n'
 		  f'Updated data for {n_upd} countries')
 
 
 def load_currencies():
 	currencies = pycountry.currencies
-	n = FiatCurrency.objects.all().count()
+	n = Currency.objects.all().count()
 	n_upd = 0
-	for c in currencies.objects:
-		if FiatCurrency.objects.filter(alpha_3=c.alpha_3).exists():
-			FiatCurrency.objects.get(alpha_3=c.alpha_3).update(**dict(c))
-			n_upd += 1
-		else:
-			FiatCurrency.objects.create(**dict(c))
-	print(f'{FiatCurrency.objects.all().count() - n} fiat currencies have been added to database. \n'
+	for c in currencies:
+		try:
+			if Currency.objects.filter(alpha_3=c.alpha_3).exists():
+				Currency.objects.get(alpha_3=c.alpha_3).update(name=c.name)
+				n_upd += 1
+			else:
+				Currency.objects.create(name=c.name[:125], alpha_3=c.alpha_3)
+		except Exception as e:
+			print(f'Error {e}')
+			continue
+	print(f'{Currency.objects.all().count() - n} fiat currencies have been added to database. \n'
 		  f'{n_upd} fiat currencies have been updated.')
 
 
-def map_currencies_to_countries():
+def map_currencies():
 	n = 0
-	codes = country_currencies.CURRENCIES_BY_COUNTRY_CODE
+	codes = {k: v[0] if v else None for k, v in country_currencies.CURRENCIES_BY_COUNTRY_CODE.items()}
 	for country in Country.objects.all():
-		alpha_3 = codes[country.alpha_2][0]
-		if FiatCurrency.objects.filter(alpha_3=alpha_3).exists():
-			currency = FiatCurrency.objects.get(alpha_3=alpha_3)
-			if currency not in country.currencies.all():
-				country.currencies.add(currency)
-				country.save()
-				n += 1
+		alpha_3 = codes[country.alpha_2]
+		if Currency.objects.filter(alpha_3=alpha_3).exists() and not country.currencies.filter(alpha_3=alpha_3).exists():
+			currency = Currency.objects.get(alpha_3=alpha_3)
+			country.currencies.add(currency)
+			country.save()
+			n += 1
 	print(f'Mapped {n} currencies to countries.')
 
 
 def load_crypto_exchanges():
 	n = CryptoExchange.objects.all().count()
-	default_exchanges = str(DEFAULT_CRYPTO_EXCHANGES)
+	default_exchanges = str(constants.DEFAULT_CRYPTO_EXCHANGES)
 	for exchange_id in ccxt.exchanges:
 		if re.search(exchange_id, default_exchanges):
 			exchange_obj = getattr(ccxt, exchange_id)({'enableRateLimit': True})
@@ -140,29 +136,6 @@ def load_crypto_exchanges():
 		else:
 			CryptoExchange.objects.create(name=exchange_id)
 	print(f'Loaded {CryptoExchange.objects.all().count() - n} exchanges to database.')
-
-
-
-def setup_crypto_db(exchange_id='binance', quote='USDT'):
-	n = Cryptocurrency.objects.all().count()
-	gecko = pycoingecko.CoinGeckoAPI()
-	coins = pd.DataFrame(columns=['id', 'symbol', 'name'], data=gecko.get_coins_list()).set_index('symbol',
-																								  inplace=True,
-																								  drop=True)
-	exchange = getattr(ccxt, exchange_id)({'enableRateLimit': True})
-	markets = pd.DataFrame(exchange.fetch_tickers()).transpose()
-	markets = markets.loc[list(filter(lambda x: x.split('/')[1] == quote, markets.index))]['last']
-	for i, v in markets.items():
-		coin = i.split('/')[0].lower()
-		try:
-			name = coins.loc[coin, 'name']
-
-		except:
-			name = ''
-		Cryptocurrency.objects.create(symbol=coin, name=name, price=v)
-	print(f'Loaded {Cryptocurrency.objects.all().count() - n} cryptocurrencies to database.')
-
-
 
 
 

@@ -6,13 +6,10 @@ import pandas as pd
 from utils.decorators import load_or_save
 import datetime
 
-api_key = os.environ.get('CRYPTOCOMPARE_API_KEY')
+api_key = '70d54fd6e56db84eba0a9d9166b4d5da087c79d3d6cc0511e69144270f90c09b'
 url = f'https://min-api.cryptocompare.com/data/v2/news/?lang=EN&api_key={api_key}'
 filename = 'cryptocomp_news.csv'
 refresh_rate = 86400
-
-
-
 
 
 @load_or_save('cryptocomp_news.csv', 86400)

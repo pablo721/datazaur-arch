@@ -14,7 +14,7 @@ def load_websites(filepath='websites.yaml'):
         count = Website.objects.all().count()
         upd_count = 0
         for k, v in websites.items():
-            if Website.objects.get(url=k).exists():
+            if Website.objects.filter(url=k).exists():
                 site = Website.objects.get(url=k)
                 site.selector = v
                 site.save()

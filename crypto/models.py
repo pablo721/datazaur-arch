@@ -3,31 +3,26 @@ from data import constants
 
 
 class Cryptocurrency(models.Model):
-    name = models.CharField(max_length=64, blank=False, null=False)
+    name = models.CharField(max_length=64)
     symbol = models.CharField(max_length=32)
-    url = models.CharField(max_length=256)
-    hash_algorithm = models.CharField(max_length=64)
-    proof_type = models.CharField(max_length=32)
-    total_coins_mined = models.FloatField()
-    circ_supply = models.FloatField()
-    max_supply = models.FloatField()
-    block_reward = models.FloatField()
-    used_in_defi = models.BooleanField()
-    used_in_nft = models.BooleanField()
+    url = models.CharField(max_length=256, null=True, blank=True)
+    description = models.CharField(max_length=256, null=True, blank=True)
+    hash_algorithm = models.CharField(max_length=64, null=True, blank=True)
+    proof_type = models.CharField(max_length=32, null=True, blank=True)
 
 
-class Ticker(models.Model):
-    base = models.CharField(max_length=32)
-    quote = models.CharField(max_length=32)
-    bid = models.FloatField()
-    ask = models.FloatField()
-    daily_low = models.FloatField()
-    daily_high = models.FloatField()
-    hourly_delta = models.FloatField()
-    daily_delta = models.FloatField()
-    weekly_delta = models.FloatField()
-    daily_vol = models.FloatField()
-    monthly_vol = models.FloatField()
+# class Ticker(models.Model):
+#     base = models.CharField(max_length=32)
+#     quote = models.CharField(max_length=32)
+#     bid = models.FloatField()
+#     ask = models.FloatField()
+#     daily_low = models.FloatField()
+#     daily_high = models.FloatField()
+#     hourly_delta = models.FloatField()
+#     daily_delta = models.FloatField()
+#     weekly_delta = models.FloatField()
+#     daily_vol = models.FloatField()
+#     monthly_vol = models.FloatField()
 
 
 
@@ -46,14 +41,13 @@ class Ticker(models.Model):
 
 class CryptoExchange(models.Model):
     name = models.CharField(max_length=128)
-    crypto_only = models.BooleanField()
-    grade = models.CharField(choices=enumerate(constants.CRYPTO_EXCHANGE_GRADES), max_length=3)
-    url = models.CharField(max_length=128)
-    countries = models.ManyToManyField('economics.Country')
-    currencies = models.ManyToManyField('markets.Currency')
-    tickers = models.ManyToManyField('crypto.Cryptocurrency', related_name='market_tickers')
-    daily_vol = models.FloatField()
-    monthly_vol = models.FloatField()
+    grade = models.CharField(choices=enumerate(constants.CRYPTO_EXCHANGE_GRADES), max_length=3, null=True, blank=True)
+    url = models.CharField(max_length=256, null=True, blank=True)
+    countries = models.ManyToManyField('economics.Country', related_name='exchange_countries')
+    currencies = models.ManyToManyField('markets.Currency', related_name='exchange_currencies')
+    tickers = models.ManyToManyField('crypto.Cryptocurrency', related_name='exchange_tickers')
+    daily_vol = models.FloatField(null=True, blank=True)
+    monthly_vol = models.FloatField(null=True, blank=True)
 
 
 class Watchlist(models.Model):

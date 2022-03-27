@@ -77,15 +77,15 @@ WSGI_APPLICATION = 'datazaur.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'freshdb2',
-        'USER': 'zaur',
+        'NAME': 'db0',
+        'USER': 'postgres',
         'PASSWORD': 'wsad1221',
         'HOST': 'localhost',
         'PORT': '5432',
         }
     }
 
-DJANGO_EXTENSIONS_RESET_DB_POSTGRESQL_ENGINES = ['django.db.backends.postgresql_psycopg2']
+#DJANGO_EXTENSIONS_RESET_DB_POSTGRESQL_ENGINES = ['django.db.backends.postgresql_psycopg2']
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
