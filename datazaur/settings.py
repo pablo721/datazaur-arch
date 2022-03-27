@@ -82,7 +82,15 @@ DATABASES = {
         'PASSWORD': 'wsad1221',
         'HOST': 'localhost',
         'PORT': '5432',
-        }
+        },
+    'heroku': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'd9hoo4qbgp6uq9',
+        'USER': 'mhyckrjvahjtjf',
+        'PASSWORD': '901fc27da08a9f252ebd75fea3712b769ca65196438e4a67979edb3df750870c',
+        'HOST': 'ec2-34-255-134-200.eu-west-1.compute.amazonaws.com',
+        'PORT': '5432',
+    }
     }
 
 #DJANGO_EXTENSIONS_RESET_DB_POSTGRESQL_ENGINES = ['django.db.backends.postgresql_psycopg2']
