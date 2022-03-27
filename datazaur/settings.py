@@ -75,7 +75,7 @@ WSGI_APPLICATION = 'datazaur.wsgi.application'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'local': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'db0',
         'USER': 'postgres',
@@ -83,7 +83,7 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432',
         },
-    'heroku': {
+    'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'd9hoo4qbgp6uq9',
         'USER': 'mhyckrjvahjtjf',
