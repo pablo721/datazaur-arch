@@ -117,6 +117,7 @@ def update_coin_prices(currency=constants.DEFAULT_CURRENCY):
 	df = pd.json_normalize(requests.get(url).json()['Data']).loc[:, cols]
 	df.columns = ['base', 'bid', 'daily_vol', 'daily_high', 'daily_low', 'daily_delta']
 	df['quote'] = currency
+	df['ask'] = 0
 	for i, r in df.iterrows():
 		if not CryptoFiatTicker.objects.filter(base=r['base'].upper()).filter(quote=currency).exists():
 			CryptoFiatTicker.objects.create(**r)
