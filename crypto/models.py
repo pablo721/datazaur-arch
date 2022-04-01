@@ -14,26 +14,25 @@ class Cryptocurrency(models.Model):
 class CryptoTicker(models.Model):
     base = models.CharField(max_length=16)
     quote = models.CharField(max_length=16)
-    bid = models.FloatField()
-    ask = models.FloatField()
-    daily_low = models.FloatField()
-    daily_high = models.FloatField()
-    hourly_delta = models.FloatField()
-    daily_delta = models.FloatField()
-    daily_vol = models.FloatField()
+    bid = models.FloatField(blank=True, null=True)
+    ask = models.FloatField(blank=True, null=True)
+    daily_vol = models.FloatField(blank=True, null=True)
+    daily_low = models.FloatField(blank=True, null=True)
+    daily_high = models.FloatField(blank=True, null=True)
+    daily_delta = models.FloatField(blank=True, null=True)
+
 
 
 class CryptoFiatTicker(models.Model):
     base = models.CharField(max_length=16)
     quote = models.CharField(max_length=3)
-    bid = models.FloatField()
-    ask = models.FloatField()
-    daily_low = models.FloatField()
-    daily_high = models.FloatField()
-    hourly_delta = models.FloatField()
-    daily_delta = models.FloatField()
-    daily_vol = models.FloatField()
-
+    bid = models.FloatField(blank=True, null=True)
+    ask = models.FloatField(blank=True, null=True)
+    daily_vol = models.FloatField(blank=True, null=True)
+    daily_low = models.FloatField(blank=True, null=True)
+    daily_high = models.FloatField(blank=True, null=True)
+    daily_delta = models.FloatField(blank=True, null=True)
+    mkt_cap = models.FloatField(blank=True, null=True)
 
 # class NFT(models.Model):
 #     name = models.CharField(max_length=64, blank=False, null=False)
