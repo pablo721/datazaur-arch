@@ -1,4 +1,3 @@
-
 from pathlib import Path
 import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -88,7 +87,7 @@ DATABASES = {
         'NAME': os.environ.get('HEROKU_DB_NAME'),
         'USER': os.environ.get('HEROKU_DB_USER'),
         'PASSWORD': os.environ.get('HEROKU_DB_PASS'),
-        'HOST': os.environ.get('HEROKU_DB_PASS'),
+        'HOST': os.environ.get('HEROKU_DB_HOST'),
         'PORT': '5432',
     }
     }

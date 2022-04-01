@@ -107,28 +107,27 @@ def get_coins_info():
 
 
 def update_coin_prices(currency=constants.DEFAULT_CURRENCY):
-	n = 0
+	n_new = 0
+	n_upd = 0
 	url = f'https://min-api.cryptocompare.com/data/top/mktcapfull?limit=100&tsym={currency}&api_key={API_KEY}'
-	cols = ['CoinInfo.Name', 'CoinInfo.FullName', f'RAW.{currency}.PRICE', f'RAW.{currency}.TOTALVOLUME24H',
+	cols = ['CoinInfo.Name', f'RAW.{currency}.PRICE', f'RAW.{currency}.TOTALVOLUME24H',
 		    f'RAW.{currency}.HIGH24HOUR', f'RAW.{currency}.LOW24HOUR',
 			f'RAW.{currency}.CHANGE24HOUR', f'RAW.{currency}.MKTCAP']
 
 	df = pd.json_normalize(requests.get(url).json()['Data']).loc[:, cols]
-	df.columns = ['Symbol', 'Name', 'Price', '24h vol', '24h high', '24h low', '24h Δ', 'Mkt cap']
-
+	df.columns = ['base', 'bid', 'daily_vol', 'daily_high', 'daily_low', 'daily_delta', 'mkt_cap']
+	df['quote'] = currency
 	for i, r in df.iterrows():
-		if not CryptoFiatTicker.objects.filter(base=r['Symbol'].upper()).filter(quote=currency).exists():
-			coin = CryptoFiatTicker.objects.create(base=r['CoinInfo.Name'], quote=currency, bid=r['Price'],
-												   ask=0, daily_vol=r['24h vol'], daily_low=r['24h low'],
-												   daily_high=r['24h high'], daily_delta=r['24h Δ'],
-												   mkt_cap=r['Mkt cap'])
-
-
-			coin = Cryptocurrency.objects.filter(symbol=r['Symbol'].upper())
-			coin.price = r['Price']
-			coin.save()
-			n += 1
-
+		if not CryptoFiatTicker.objects.filter(base=r['base'].upper()).filter(quote=currency).exists():
+			CryptoFiatTicker.objects.create(**r)
+			n_new += 1
+		else:
+			ticker = CryptoFiatTicker.objects.filter(base=r['base']).filter(quote=currency)[0]
+			ticker.__dict__.update(**r)
+			ticker.save()
+			n_upd += 1
+		print(str(**r))
+	print(f'Created {n_new} tickers \n ' f'Updated prices of {n_upd} tickers')
 
 
 
