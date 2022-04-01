@@ -12,6 +12,27 @@ from .forms import FindUsers
 from website.models import *
 
 
+class MessengerView(TemplateView):
+    template_name = 'messenger/messenger.html'
+    find_form = FindUsers
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+
+        return render(request, self.template_name, context)
+
+    @login_required
+    def post(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+
+
+        return HttpResponseRedirect(reverse('messenger:messenger'))
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['messages'] = Message.objects.filter()
+
+
 
 @login_required
 def messenger(request):
@@ -83,25 +104,6 @@ def send(request):
     return HttpResponse('sent')
 
 
-class MessengerView(TemplateView):
-    template_name = 'messenger/messenger.html'
-    #find_form
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-
-        return render(request, self.template_name, context)
-
-    @login_required
-    def post(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-
-
-        return HttpResponseRedirect(reverse('messenger:messenger'))
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['messages'] = Message.objects.filter()
 
 
 

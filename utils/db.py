@@ -59,10 +59,12 @@ def load_cryptocomp_coins():
 	coins[['description', 'url']] = coins[['description', 'url']].apply(lambda x: x[:254])
 	for i, row in coins.iterrows():
 		if not Cryptocurrency.objects.filter(symbol=row['symbol']).exists():
-			Cryptocurrency.objects.create(name=row['name'], symbol=row['symbol'], url=str(row['url'])[:254] if row['url'] else '',
-										  description=str(row['description'])[:254] if row['description'] else '',
-										  hash_algorithm=row['hash_algorithm'], proof_type=row['proof_type'])
-
+			try:
+				Cryptocurrency.objects.create(name=row['name'], symbol=row['symbol'], url=str(row['url'])[:254] if row['url'] else '',
+											  description=str(row['description'])[:254] if row['description'] else '',
+											  hash_algorithm=row['hash_algorithm'], proof_type=row['proof_type'])
+			except:
+				continue
 	print(f'Loaded {Cryptocurrency.objects.all().count() - n} cryptocurrencies from Cryptocompare.')
 
 

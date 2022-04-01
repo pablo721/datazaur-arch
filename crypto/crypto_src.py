@@ -16,7 +16,7 @@ from data import constants
 
 
 CURRENCY = constants.DEFAULT_CURRENCY
-API_KEY = os.environ.get("CRYPTOCOMPARE_KEY")
+API_KEY = os.environ.get("CRYPTOCOMPARE_API_KEY")
 
 def gecko_quote(base, quote):
 	gecko = pycoingecko.CoinGeckoAPI()
@@ -112,7 +112,7 @@ def update_coin_prices():
 	df = pd.json_normalize(requests.get(url).json()['Data']).loc[:, cols]
 	df.columns = ['Symbol', 'Name', 'Price']
 	for i, r in df.iterrows():
-		coin = CryptoCURRENCY.objects.get(symbol=r['Symbol'])
+		coin = Cryptocurrency.objects.get(symbol=r['Symbol'])
 		coin.price = r['Price']
 		coin.save()
 

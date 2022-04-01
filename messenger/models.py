@@ -11,6 +11,7 @@ class Message(models.Model):
     delivered = models.BooleanField(default=False)
     read = models.BooleanField(default=False)
 
+
     def __str__(self):
         return str(self.timestamp) + ' ' + self.sender.username + ': ' + str(self.content)
 

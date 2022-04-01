@@ -79,16 +79,16 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'db0',
         'USER': 'postgres',
-        'PASSWORD': 'wsad1221',
+        'PASSWORD': os.environ.get('LOCAL_DB_PASS'),
         'HOST': 'localhost',
         'PORT': '5432',
         },
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'd9hoo4qbgp6uq9',
-        'USER': 'mhyckrjvahjtjf',
-        'PASSWORD': '901fc27da08a9f252ebd75fea3712b769ca65196438e4a67979edb3df750870c',
-        'HOST': 'ec2-34-255-134-200.eu-west-1.compute.amazonaws.com',
+        'NAME': os.environ.get('HEROKU_DB_NAME'),
+        'USER': os.environ.get('HEROKU_DB_USER'),
+        'PASSWORD': os.environ.get('HEROKU_DB_PASS'),
+        'HOST': os.environ.get('HEROKU_DB_PASS'),
         'PORT': '5432',
     }
     }
