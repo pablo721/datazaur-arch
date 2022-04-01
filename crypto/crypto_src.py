@@ -112,10 +112,10 @@ def update_coin_prices(currency=constants.DEFAULT_CURRENCY):
 	url = f'https://min-api.cryptocompare.com/data/top/mktcapfull?limit=100&tsym={currency}&api_key={API_KEY}'
 	cols = ['CoinInfo.Name', f'RAW.{currency}.PRICE', f'RAW.{currency}.TOTALVOLUME24H',
 		    f'RAW.{currency}.HIGH24HOUR', f'RAW.{currency}.LOW24HOUR',
-			f'RAW.{currency}.CHANGE24HOUR', f'RAW.{currency}.MKTCAP']
+			f'RAW.{currency}.CHANGE24HOUR']
 
 	df = pd.json_normalize(requests.get(url).json()['Data']).loc[:, cols]
-	df.columns = ['base', 'bid', 'daily_vol', 'daily_high', 'daily_low', 'daily_delta', 'mkt_cap']
+	df.columns = ['base', 'bid', 'daily_vol', 'daily_high', 'daily_low', 'daily_delta']
 	df['quote'] = currency
 	for i, r in df.iterrows():
 		if not CryptoFiatTicker.objects.filter(base=r['base'].upper()).filter(quote=currency).exists():

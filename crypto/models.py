@@ -32,7 +32,6 @@ class CryptoFiatTicker(models.Model):
     daily_low = models.FloatField(blank=True, null=True)
     daily_high = models.FloatField(blank=True, null=True)
     daily_delta = models.FloatField(blank=True, null=True)
-    mkt_cap = models.FloatField(blank=True, null=True)
 
 # class NFT(models.Model):
 #     name = models.CharField(max_length=64, blank=False, null=False)
