@@ -11,19 +11,28 @@ class Cryptocurrency(models.Model):
     proof_type = models.CharField(max_length=32, null=True, blank=True)
 
 
-# class Ticker(models.Model):
-#     base = models.CharField(max_length=32)
-#     quote = models.CharField(max_length=32)
-#     bid = models.FloatField()
-#     ask = models.FloatField()
-#     daily_low = models.FloatField()
-#     daily_high = models.FloatField()
-#     hourly_delta = models.FloatField()
-#     daily_delta = models.FloatField()
-#     weekly_delta = models.FloatField()
-#     daily_vol = models.FloatField()
-#     monthly_vol = models.FloatField()
+class CryptoTicker(models.Model):
+    base = models.CharField(max_length=16)
+    quote = models.CharField(max_length=16)
+    bid = models.FloatField()
+    ask = models.FloatField()
+    daily_low = models.FloatField()
+    daily_high = models.FloatField()
+    hourly_delta = models.FloatField()
+    daily_delta = models.FloatField()
+    daily_vol = models.FloatField()
 
+
+class CryptoFiatTicker(models.Model):
+    base = models.CharField(max_length=16)
+    quote = models.CharField(max_length=3)
+    bid = models.FloatField()
+    ask = models.FloatField()
+    daily_low = models.FloatField()
+    daily_high = models.FloatField()
+    hourly_delta = models.FloatField()
+    daily_delta = models.FloatField()
+    daily_vol = models.FloatField()
 
 
 # class NFT(models.Model):

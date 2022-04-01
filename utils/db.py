@@ -68,6 +68,12 @@ def load_cryptocomp_coins():
 	print(f'Loaded {Cryptocurrency.objects.all().count() - n} cryptocurrencies from Cryptocompare.')
 
 
+
+def load_tickers(exchanges=constants.DEFAULT_CRYPTO_EXCHANGES):
+	url = f'https://min-api.cryptocompare.com/data/v4/all/exchanges?api_key={API_KEY}'
+
+
+
 def load_gecko_coins():
 	n = Cryptocurrency.objects.all().count()
 	gecko = CoinGeckoAPI()

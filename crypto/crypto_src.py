@@ -107,14 +107,24 @@ def get_coins_info():
 
 
 def update_coin_prices():
+	n = 0
 	url = f'https://min-api.cryptocompare.com/data/top/mktcapfull?limit=100&tsym={CURRENCY}&api_key={API_KEY}'
-	cols = f'CoinInfo.Symbol RAW.{CURRENCY}.PRICE'.split()
+	cols = ['CoinInfo.Name', 'CoinInfo.FullName', f'RAW.{CURRENCY}.PRICE', f'RAW.{CURRENCY}.TOTALVOLUME24H',
+			f'RAW.{CURRENCY}.HIGHDAY', f'RAW.{CURRENCY}.HIGH24HOUR', f'RAW.{CURRENCY}.LOW24HOUR',
+			f'RAW.{CURRENCY}.CHANGE24HOUR', f'RAW.{CURRENCY}.MKTCAP']
+
 	df = pd.json_normalize(requests.get(url).json()['Data']).loc[:, cols]
 	df.columns = ['Symbol', 'Name', 'Price']
 	for i, r in df.iterrows():
-		coin = Cryptocurrency.objects.get(symbol=r['Symbol'])
-		coin.price = r['Price']
-		coin.save()
+		if Cryptocurrency.objects.filter(symbol=r['Symbol'].upper()).exists():
+			coin = Cryptocurrency.objects.filter(symbol=r['Symbol'].upper())
+			coin.price = r['Price']
+			coin.save()
+			n += 1
+
+
+
+
 
 
 @load_or_save('crypto_small.csv', 600)
@@ -142,6 +152,10 @@ def top_coins_by_mcap():
 	df.iloc[:, 6:9] = df.iloc[:, 6:9].astype('int64')
 
 	return prepare_df_display(df)
+
+
+
+
 
 
 @load_or_save('exchanges.csv', 86400)

@@ -3,6 +3,8 @@ from .models import *
 
 
 admin.site.register(Cryptocurrency)
+admin.site.register(CryptoTicker)
+admin.site.register(CryptoFiatTicker)
 admin.site.register(CryptoExchange)
 admin.site.register(Watchlist)
 admin.site.register(Portfolio)
