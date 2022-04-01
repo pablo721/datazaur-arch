@@ -7,7 +7,6 @@ from pycoingecko import CoinGeckoAPI
 import yaml
 import json
 import re
-from django.contrib.auth.models import User
 from markets.models import *
 from website.models import *
 from crypto.models import *
