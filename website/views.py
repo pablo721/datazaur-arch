@@ -19,7 +19,7 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         if self.request.user.is_authenticated:
-            return {'user': request.user}
+            return {'user': self.request.user}
 
 
 class LoginView(View):

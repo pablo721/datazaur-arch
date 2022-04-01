@@ -1,3 +1,5 @@
+
+from django.db import connection
 import pandas as pd
 import pycountry
 import country_currencies
@@ -30,7 +32,7 @@ def load_config(filepath='config.yaml'):
 	n = Config.objects.all().count()
 	for k, v in cfg_data.items():
 		if Config.objects.filter(key=k).exists():
-			Config.objects.get(key=k).update(value=v)
+			Config.objects.get(key=k).value=v
 			n_upd += 1
 		else:
 			Config.objects.create(key=k, value=v)
@@ -38,29 +40,31 @@ def load_config(filepath='config.yaml'):
 		  f'Updated {n_upd} parameters.')
 
 
+
 def setup_all():
+	funcs = [load_config, load_countries, load_currencies, map_currencies, load_cryptocomp_coins, load_crypto_exchanges]
+	tables = ['website_config', 'economics_country', 'markets_currency', 'markets_currency', 'crypto_cryptocurrency',
+			  'crypto_cryptoexchange']
 	try:
-		load_config()
-		print('Config loaded.')
-		load_countries()
-		load_currencies()
-		map_currencies()
-		load_cryptocomp_coins()
-		#load_gecko_coins()
-		load_crypto_exchanges()
-		print(f'All imports complete.')
+		for func, table in zip(funcs, tables):
+			func()
+			UpdateTimer.objects.get(table=table).timestamp = datetime.datetime.now()
 	except Exception as e:
 		print(f'Error: {e}')
+
 
 
 def load_cryptocomp_coins():
 	n = Cryptocurrency.objects.all().count()
 	coins = get_coins_info().loc[:, ['Symbol', 'CoinName', 'Description', 'Algorithm', 'ProofType', 'AssetWebsiteUrl']]
 	coins.columns = ['symbol', 'name', 'description', 'hash_algorithm', 'proof_type', 'url']
-	coins[['description', 'url']] = coins[['description', 'url']].apply(lambda x: x[:255])
+	coins[['description', 'url']] = coins[['description', 'url']].apply(lambda x: x[:254])
 	for i, row in coins.iterrows():
 		if not Cryptocurrency.objects.filter(symbol=row['symbol']).exists():
-			Cryptocurrency.objects.create(**dict(row))
+			Cryptocurrency.objects.create(name=row['name'], symbol=row['symbol'], url=str(row['url'])[:254] if row['url'] else '',
+										  description=str(row['description'])[:254] if row['description'] else '',
+										  hash_algorithm=row['hash_algorithm'], proof_type=row['proof_type'])
+
 	print(f'Loaded {Cryptocurrency.objects.all().count() - n} cryptocurrencies from Cryptocompare.')
 
 
@@ -73,21 +77,16 @@ def load_gecko_coins():
 	for i, r in coins.iterrows():
 		if not Cryptocurrency.objects.filter(symbol__ilike=i).exists():
 			Cryptocurrency.objects.create(symbol=i.lower(), name=r['name'].lower())
-	print(f'Loaded {Cryptocurrency.objects.all().count() - n} cryptocurrencies from CoinGecko.')
+	print(f'Loaded {Cryptocurrency.objects.all().count() - n} cryptos from CoinGecko.')
 
 
 def load_countries():
 	countries = pycountry.countries
-	n_upd = 0
 	n = Country.objects.all().count()
 	for obj in countries:
-		if Country.objects.filter(name=obj.name).exists():
-			Country.objects.get(name=obj.name).update(**dict(obj))
-			n_upd += 1
-		else:
+		if not Country.objects.filter(name=obj.name).exists():
 			Country.objects.create(alpha_2=obj.alpha_2, name=obj.name)
-	print(f'Added {Country.objects.all().count() - n} countries to database. \n'
-		  f'Updated data for {n_upd} countries')
+	print(f'Loaded {Country.objects.all().count() - n} countries to db. \n')
 
 
 def load_currencies():
@@ -104,8 +103,8 @@ def load_currencies():
 		except Exception as e:
 			print(f'Error {e}')
 			continue
-	print(f'{Currency.objects.all().count() - n} fiat currencies have been added to database. \n'
-		  f'{n_upd} fiat currencies have been updated.')
+	print(f'Added {Currency.objects.all().count() - n}  currencies to db. \n'
+		  f'Updated {n_upd}  currencies.')
 
 
 def map_currencies():
@@ -128,7 +127,7 @@ def load_crypto_exchanges():
 		if re.search(exchange_id, default_exchanges):
 			exchange_obj = getattr(ccxt, exchange_id)({'enableRateLimit': True})
 			exchange_obj.load_markets()
-			ex = CryptoExchange.objects.create(name=exchange_id, url=exchange_obj.urls['www'])
+			ex = CryptoExchange.objects.create(name=exchange_id, url=exchange_obj.urls['www'][:255])
 			for country_code in exchange_obj.countries:
 				if Country.objects.filter(alpha_2=country_code).exists():
 					ex.countries.add(Country.objects.get(alpha_2=country_code))
