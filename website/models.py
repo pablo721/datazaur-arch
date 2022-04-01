@@ -21,6 +21,6 @@ class Config(models.Model):
 
 
 
-class UpdateTimer(models.Model):
+class Updates(models.Model):
     table = models.CharField(max_length=32)
     timestamp = models.DateTimeField()

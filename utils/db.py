@@ -46,7 +46,7 @@ def setup_all():
 	try:
 		for func, table in zip(funcs, tables):
 			func()
-			UpdateTimer.objects.get(table=table).timestamp = datetime.datetime.now()
+			Updates.objects.get(table=table).timestamp = datetime.datetime.now()
 	except Exception as e:
 		print(f'Error: {e}')
 
