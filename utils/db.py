@@ -1,5 +1,4 @@
 
-from django.db import connection
 import pandas as pd
 import pycountry
 import country_currencies
