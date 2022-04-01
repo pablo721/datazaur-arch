@@ -1,3 +1,3 @@
 release: python manage.py makemigrations;
-web: gunicorn datazaur.wsgi
+web: python manage.py runserver 0.0.0.0:$PORT
 
